@@ -4,6 +4,8 @@ class ProductTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end
+  fixtures :products
+
   test "Product attributes must not be empty" do 
     product = Product.new
     assert product.invalid?
@@ -33,7 +35,7 @@ class ProductTest < ActiveSupport::TestCase
     Product.new(title: "My Book Title", description: "yyy",
     price: 1, image_url: image_url)
   end
-  
+
   test "image url" do
     ok = %w{ fred.gif fred.jpg fred.png Fred.JPG FRED.jpg http://a.b.c/x/y/z/fred.gif}
     bad = %w{ fred.doc fred.fig/more fred.gif.more}
@@ -44,5 +46,17 @@ class ProductTest < ActiveSupport::TestCase
     bad.each do |name|
       assert new_product(name).invalid?, "#{name} shouldn't be valid"
     end
+  end
+
+  test "Product is not valid without a unique title - i18n" do
+    product = Product.new(title: products(:ruby).title,
+    
+    description: "yyy",
+    price: 1,
+    image_url: "fred.gif")
+
+    assert product.invalid?
+    assert_equal [I18n.translate('errors.messages.taken')],
+    product.errors[:title]
   end
 end
